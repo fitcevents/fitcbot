@@ -1,6 +1,10 @@
 var restify = require('restify');
 var builder = require('botbuilder');
 var request = require('request');
+var dotenv = require('dotenv');
+
+// Load ENV variables
+dotenv.load();
 
 //=========================================================
 // Bot Setup
