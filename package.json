@@ -12,6 +12,9 @@
     "devstart": "node_modules/.bin/nodemon app.js",
     "setup": "node setup.js"
   },
+  "engines": {
+    "node": "6.10.0"
+  },
   "author": "",
   "license": "MIT",
   "bugs": {
