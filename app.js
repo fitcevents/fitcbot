@@ -17,7 +17,6 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 });
   
 // Create chat bot
-
 var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID,
     appPassword: process.env.MICROSOFT_APP_PASSWORD
@@ -36,13 +35,13 @@ server.post('/api/messages', connector.listen());
 
 bot.dialog('/', [
     function (session) {
-        var q = "Hello! I can answer questions about sessions or general questions or show you a picture of a cute cat?";
-        builder.Prompts.choice(session, q, "Session|FAQ|Cute Cats!");
+        var q = "Hello! I can answer questions about presentations, general questions about the event or show you a picture of a cute cat?";
+        builder.Prompts.choice(session, q, "Presentations|FAQ|Cute Cats!");
     },
     function(session, results, next) {
         if (results.response) {
             if(results.response.index === 0){
-                session.beginDialog('/sessions');
+                session.beginDialog('/presentations');
             }
             else if (results.response.index === 1){
                 session.beginDialog('/faq');
@@ -58,28 +57,27 @@ bot.dialog('/', [
     }
 ]);
 
-bot.dialog('/sessions', [
+bot.dialog('/presentations', [
     function(session){
         var q = "What would you like to know? I can answer questions these questions:"
         builder.Prompts.choice(session, q, [
-            "What are the next sessions?",
-            "What are all the sessions happening right now?",
-            "What are the party details?"
+            "What are the next presentations?",
+            "What are all the presentations happening right now?",
+            "When is a speaker's talk?"
         ]);
     },
     function(session, results, next) {
         if (results.response) {
             if(results.response.index === 0){
-                //TODO: Write code to answer these questions...
+                //TODO: fire off api request for nextPresentations
                 next();
             }
             else if (results.response.index === 1){
-                //TODO: Write code to answer these questions...
+                //TODO: fire off an api request for currentPresentations
                 next();
             }
             else if (results.response.index === 2){
-                //TODO: Write code to answer these questions...
-                next();
+                session.beginDialog('/findSpeaker');
             } else {
                 next();
             }
@@ -87,7 +85,53 @@ bot.dialog('/sessions', [
             next();
         }
     }, 
+    function(session, results) {
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/findSpeaker', [
     function(session) {
+        builder.Prompts.text(session, "What's the name of the speaker you are looking for?");
+    },
+    function(session, results, next) {
+        session.send('Let me see what I can find about %s', results.response);
+        session.sendTyping();
+        
+        request.post({
+            url: "https://fitc.ca/wp/api/search/speaker",
+            body: JSON.stringify({speaker: args.speaker})
+        }, 
+        function(error, response, body) {
+            if(!error) {
+                var answer = JSON.parse(body).response;
+                // TODO turn this into a card
+                session.send(response);
+                next();
+            } else {
+                session.send("I couldn't find anything.");
+                next();
+            }
+        }, 
+        function(session){
+            var q = "Do you want to lookup another speaker?";
+            builder.Prompts.choice(session, q, "Yes|No");
+        },
+        function(session, results, next){
+            if (results.response) {
+                if(results.response.index === 0){
+                    session.replaceDialog('/findSpeaker', {reprompt: true });
+                } else if (results.response.index === 1){
+                    session.endDialog();
+                } else {
+                    next();
+                }
+            } else {
+                next();
+            }
+        });
+    },
+    function(session, results, next) {
         session.endDialog();
     }
 ]);
