@@ -100,7 +100,7 @@ bot.dialog('/findSpeaker', [
         session.sendTyping();
         
         request.post({
-            url: "https://fitc.ca/wp/api/search/speaker",
+            url: "https://fitc.ca/wp/api/services/bot/search/speaker",
             body: JSON.stringify({speaker: args.speaker})
         }, 
         function(error, response, body) {
@@ -142,6 +142,8 @@ bot.dialog('/findSpeaker', [
 // QnA Dialogs
 //=========================================================
 
+// Tried to figure out how to use the cognitiveServices lib for this, but wasn't able to make it work with the other dialogs as envisioned
+/*
 var recognizer = new cognitiveServices.QnAMakerRecognizer({
     knowledgeBaseId: process.env.KB_ID,
     subscriptionKey: process.env.CS_SUBKEY
@@ -149,17 +151,26 @@ var recognizer = new cognitiveServices.QnAMakerRecognizer({
 
 var basicQnAMakerDialog = new cognitiveServices.QnAMakerDialog({
     recognizers: [recognizer],
-    defaultNoMatchMessage: 'You stumped me. Try again.',
-    defaultMessage: 'What can I answer?',
+    defaultMessage: 'You stumped me. Try again.',
     qnaThreshold: 0.3
 });
 
-bot.dialog('/faq', basicQnAMakerDialog);
+bot.dialog('/faq', [
+    function(session) {
+        builder.Prompts.text(session, "Type a question and I will phone up Shawn to get the answer.");
+    },
+    function(session, results, next) {
+        session.beginDialog('/startQnA');
+    }
+]);
 
-/*
+bot.dialog('/startQnA', basicQnAMakerDialog);
+*/
+
+
 bot.dialog('/faq', [
     function(session){
-        builder.Prompts.text(session, "What can I answer?");
+        builder.Prompts.text(session, "Type a question and I will phone up Shawn to get the answer.");
     },
     function(session, results, next){
         session.sendTyping();
@@ -180,8 +191,8 @@ bot.dialog('/faq', [
         });
     }, 
     function(session){
-        var q = "Would you like to ask another FAQ question or go back to the main menu?";
-        builder.Prompts.choice(session, q, "Yes|Go Back");
+        var q = "Would you like me to ask Shawn another question?";
+        builder.Prompts.choice(session, q, "Yup|Nope");
     }, 
     function(session, results, next){
          if (results.response) {
@@ -198,4 +209,3 @@ bot.dialog('/faq', [
          }
     }
 ]);
-*/
