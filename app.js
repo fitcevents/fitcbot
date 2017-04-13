@@ -1,6 +1,6 @@
 var restify = require('restify');
 var builder = require('botbuilder');
-var cognitiveservices = require('botbuilder-cognitiveservices/lib');
+var cognitiveServices = require('botbuilder-cognitiveservices');
 var request = require('request');
 var dotenv = require('dotenv');
 
@@ -142,12 +142,12 @@ bot.dialog('/findSpeaker', [
 // QnA Dialogs
 //=========================================================
 
-var recognizer = new congitiveservices.QnAMakerRecognizer({
+var recognizer = cognitiveServices.QnAMakerRecognizer({
     knowledgeBaseId: process.env.KB_ID,
     subscriptionKey: process.env.CS_SUBKEY
 });
 
-var basicQnAMakerDialog = new cognitiveservices.QnAMakerDialog({
+var basicQnAMakerDialog = cognitiveServices.QnAMakerDialog({
     recognizers: [recognizer],
     defaultNoMatchMessage: 'You stumped me. Try again.',
     defaultMessage: 'What can I answer?',
