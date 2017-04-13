@@ -142,12 +142,12 @@ bot.dialog('/findSpeaker', [
 // QnA Dialogs
 //=========================================================
 
-var recognizer = cognitiveServices.QnAMakerRecognizer({
+var recognizer = new cognitiveServices.QnAMakerRecognizer({
     knowledgeBaseId: process.env.KB_ID,
     subscriptionKey: process.env.CS_SUBKEY
 });
 
-var basicQnAMakerDialog = cognitiveServices.QnAMakerDialog({
+var basicQnAMakerDialog = new cognitiveServices.QnAMakerDialog({
     recognizers: [recognizer],
     defaultNoMatchMessage: 'You stumped me. Try again.',
     defaultMessage: 'What can I answer?',
