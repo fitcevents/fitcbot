@@ -1,5 +1,6 @@
 var restify = require('restify');
 var builder = require('botbuilder');
+var cognitiveservices = require('botbuilder-cognitiveservices');
 var request = require('request');
 var dotenv = require('dotenv');
 
@@ -136,6 +137,26 @@ bot.dialog('/findSpeaker', [
     }
 ]);
 
+
+//=========================================================
+// QnA Dialogs
+//=========================================================
+
+var recognizer = new congitiveservices.QnAMakerRecognizer({
+    knowledgeBaseId: process.env.KB_ID,
+    subscriptionKey: process.env.CS_SUBKEY
+});
+
+var basicQnAMakerDialog = new cognitiveservices.QnAMakerDialog({
+    recognizers: [recognizer],
+    defaultNoMatchMessage: 'You stumped me. Try again.',
+    defaultMessage: 'What can I answer?',
+    qnaThreshold: 0.3
+});
+
+bot.dialog('/faq', basicQnAMakerDialog);
+
+/*
 bot.dialog('/faq', [
     function(session){
         builder.Prompts.text(session, "What can I answer?");
@@ -177,3 +198,4 @@ bot.dialog('/faq', [
          }
     }
 ]);
+*/
