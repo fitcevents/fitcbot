@@ -1,6 +1,6 @@
 var restify = require('restify');
 var builder = require('botbuilder');
-var cognitiveservices = require('botbuilder-cognitiveservices');
+var cognitiveservices = require('../lib/botbuilder-cognitiveservices');
 var request = require('request');
 var dotenv = require('dotenv');
 
