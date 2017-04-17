@@ -96,17 +96,40 @@ bot.dialog('/findSpeaker', [
         builder.Prompts.text(session, "What's the name of the speaker you are looking for?");
     },
     function(session, results, next) {
-        session.send('Let me see what I can find about %s', results.response);
+        session.send('Let me see what I can find about "%s"', results.response);
         session.sendTyping();
         
         request.post({
-            url: "https://fitc.ca/wp/api/services/bot/search/speaker",
-            body: JSON.stringify({speaker: args.speaker})
+            url: "https://fitc.local/wp/api/services/search/speaker",
+            body: JSON.stringify({speaker: results.response})
         }, 
-        function(error, response, body) {
+        function(error, response, body, next) {
+
             if(!error) {
                 var answer = JSON.parse(body).response;
-                // TODO turn this into a card
+                var presentation_cards = [];
+                var presentations = answers.presentations;
+                var total_presentations = presentations.length;
+
+                if(total_presentations > 1) {
+                    session.send('I found the following talk by ' + answer.speaker_name);
+                } else {
+                    session.send('I found the following talks by ' + answer.speaker_name);
+                }
+
+                for( i = 0; i < total_presentations; i++) {
+                    var card = new builder.HeroCard(session)
+                        .title(presentations[i].presentation_name)
+                        .subtitle(presentations[i].presentation_date)
+                        .tap(builder.CardAction.openUrl(session, presentations[i].presentation_link));
+                        
+                    presentation_cards.push(card);
+                }
+
+                var response = new builder.Message(session)
+                    .textFormat(builder.TextFormat.xml)
+                    .attachments(presentations);
+                
                 session.send(response);
                 next();
             } else {
@@ -119,17 +142,11 @@ bot.dialog('/findSpeaker', [
             builder.Prompts.choice(session, q, "Yes|No");
         },
         function(session, results, next){
-            if (results.response) {
-                if(results.response.index === 0){
-                    session.replaceDialog('/findSpeaker', {reprompt: true });
-                } else if (results.response.index === 1){
-                    session.endDialog();
-                } else {
-                    next();
-                }
-            } else {
-                next();
+            if (results.response && results.response.index === 0) {
+                session.replaceDialog('/findSpeaker', {reprompt: true });
             }
+            
+            next();
         });
     },
     function(session, results, next) {
