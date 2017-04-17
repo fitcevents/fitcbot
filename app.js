@@ -92,7 +92,7 @@ bot.dialog('/presentations', [
 ]);
 
 bot.dialog('/findSpeaker', [
-    function(session) {
+    function(session, next) {
         builder.Prompts.text(session, "What's the name of the speaker you are looking for?");
     },
     function(session, results, next) {
@@ -103,7 +103,7 @@ bot.dialog('/findSpeaker', [
             url: "https://fitc.local/wp/api/services/search/speaker",
             body: JSON.stringify({speaker: results.response})
         }, 
-        function(error, response, body, next) {
+        function(error, response, body) {
 
             if(!error) {
                 var answer = JSON.parse(body).response;
@@ -136,18 +136,18 @@ bot.dialog('/findSpeaker', [
                 session.send("I couldn't find anything.");
                 next();
             }
-        }, 
-        function(session){
-            var q = "Do you want to lookup another speaker?";
-            builder.Prompts.choice(session, q, "Yes|No");
-        },
-        function(session, results, next){
-            if (results.response && results.response.index === 0) {
-                session.replaceDialog('/findSpeaker', {reprompt: true });
-            }
-            
-            next();
         });
+    }, 
+    function(session, next){
+        var q = "Do you want to lookup another speaker?";
+        builder.Prompts.choice(session, q, "Yes|No");
+    },
+    function(session, results, next){
+        if (results.response && results.response.index === 0) {
+            session.replaceDialog('/findSpeaker', {reprompt: true });
+        }
+        
+        next();
     },
     function(session, results, next) {
         session.endDialog();
