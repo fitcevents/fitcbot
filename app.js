@@ -2,6 +2,7 @@ var restify = require('restify');
 var builder = require('botbuilder');
 var cognitiveServices = require('botbuilder-cognitiveservices');
 var request = require('request');
+var rp = require('request-promise');
 var dotenv = require('dotenv');
 
 // Load ENV variables
@@ -98,17 +99,21 @@ bot.dialog('/findSpeaker', [
     function(session, results, next) {
         session.send('Let me see what I can find about "%s"', results.response);
         session.sendTyping();
-        
-        request.post({
-            url: "https://fitc.local/wp/api/services/search/speaker",
-            body: JSON.stringify({speaker: results.response})
-        }, 
-        function(error, response, body) {
 
-            if(!error) {
-                var answer = JSON.parse(body).response;
+        var rp_options = {
+            uri: 'http://fitc.local/fitc/wp/api/services/search/speaker/' + encodeURIComponent(results.response),
+            headers: {
+                'User-Agent': 'Request-Promise',
+                'Content-Type': 'application/json'
+            },
+            json: true
+        };
+
+        rp(rp_options)
+            .then(function(res) {
+                var answer = res;
                 var presentation_cards = [];
-                var presentations = answers.presentations;
+                var presentations = answer.presentations;
                 var total_presentations = presentations.length;
 
                 if(total_presentations > 1) {
@@ -121,22 +126,26 @@ bot.dialog('/findSpeaker', [
                     var card = new builder.HeroCard(session)
                         .title(presentations[i].presentation_name)
                         .subtitle(presentations[i].presentation_date)
-                        .tap(builder.CardAction.openUrl(session, presentations[i].presentation_link));
+                        .images([])
+                        .buttons([
+                            builder.CardAction.openUrl(session, presentations[i].presentation_link, 'View Details')
+                        ]);
                         
                     presentation_cards.push(card);
                 }
 
                 var response = new builder.Message(session)
-                    .textFormat(builder.TextFormat.xml)
-                    .attachments(presentations);
+                    .textFormat(builder.TextFormat.plain)
+                    .attachmentLayout(builder.AttachmentLayout.carousel)
+                    .attachments(presentation_cards);
                 
                 session.send(response);
                 next();
-            } else {
-                session.send("I couldn't find anything.");
+            })
+            .catch(function(err) {
+                session.send("Something went wrong.");
                 next();
-            }
-        });
+            });
     }, 
     function(session, next){
         var q = "Do you want to lookup another speaker?";
@@ -145,9 +154,9 @@ bot.dialog('/findSpeaker', [
     function(session, results, next){
         if (results.response && results.response.index === 0) {
             session.replaceDialog('/findSpeaker', {reprompt: true });
+        } else {
+            next();
         }
-        
-        next();
     },
     function(session, results, next) {
         session.endDialog();
@@ -226,3 +235,22 @@ bot.dialog('/faq', [
          }
     }
 ]);
+
+
+function isJson(item) {
+    item = typeof item !== "string"
+        ? JSON.stringify(item)
+        : item;
+
+    try {
+        item = JSON.parse(item);
+    } catch (e) {
+        return false;
+    }
+
+    if (typeof item === "object" && item !== null) {
+        return true;
+    }
+
+    return false;
+}

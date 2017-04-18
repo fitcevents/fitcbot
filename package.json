@@ -26,6 +26,7 @@
     "botbuilder": "^3.7.0",
     "botbuilder-cognitiveservices": "^1.0.1",
     "dotenv": "^4.0.0",
+    "request-promise": "^4.2.0",
     "requests": "^0.1.7",
     "restify": "^4.3.0"
   },
