@@ -101,7 +101,7 @@ bot.dialog('/findSpeaker', [
         session.sendTyping();
 
         var rp_options = {
-            uri: FITC_API_ROOT + '/services/search/speaker/' + encodeURIComponent(results.response),
+            uri: process.env.FITC_API_ROOT + '/services/search/speaker/' + encodeURIComponent(results.response),
             headers: {
                 'User-Agent': 'Request-Promise',
                 'Content-Type': 'application/json'

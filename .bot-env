@@ -1,5 +1,6 @@
-MICROSOFT_APP_ID=123
-MICROSOFT_APP_PASSWORD=123
-KB_HOST=
-KB_ID=
-CS_SUBKEY=
+MICROSOFT_APP_ID=68e0eb99-69b3-4276-8d6c-3f28d38c0c6e
+MICROSOFT_APP_PASSWORD=16jnoefX3mZ8Dhj8oJCtNxn
+KB_HOST=https://westus.api.cognitive.microsoft.com/qnamaker/v1.0
+KB_ID=daad98db-7901-4069-a2ae-daf9199711f9
+CS_SUBKEY=c7acd25c44b045efb323dac015abf8f8
+FITC_API_ROOT=http://fitc.local/fitc/wp/api
