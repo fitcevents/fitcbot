@@ -104,14 +104,13 @@ bot.dialog('/presentations', [
     function(session){
         var q = "I can answer these questions about presentations:"
         builder.Prompts.choice(session, q, [
-            "What presentations are up next?",
-            "What presentations happening right now?",
-            "When is a particular speaker's talk?"
+            "Up next?",
+            "On now?",
+            "Speaker Search"
         ],
         {
             maxRetries: 3,
-            retryPrompt: 'Ooops, what you wrote is not a valid option, please try again.',
-            listStyle: builder.ListStyle["list"]
+            retryPrompt: 'Ooops, what you wrote is not a valid option, please try again.'
         });
     },
     function(session, results, next) {
