@@ -110,7 +110,8 @@ bot.dialog('/presentations', [
         ],
         {
             maxRetries: 3,
-            retryPrompt: 'Ooops, what you wrote is not a valid option, please try again.'
+            retryPrompt: 'Ooops, what you wrote is not a valid option, please try again.',
+            listStyle: builder.ListStyle["list"]
         });
     },
     function(session, results, next) {
