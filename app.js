@@ -102,6 +102,9 @@ bot.dialog('/cats', [
  */
 bot.dialog('/presentations', [
     function(session){
+        session.send("Please note, I currently am only capable of answering questions about presentations on the day of the event.");
+        session.send("I'm working on this though...if I could just find where I left my power cord...");
+        
         var q = "I can answer these questions about presentations:"
         builder.Prompts.choice(session, q, [
             "Up next?",
