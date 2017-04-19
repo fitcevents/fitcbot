@@ -160,34 +160,46 @@ bot.dialog('/findSpeaker', [
         rp(rp_options)
             .then(function(res) {
                 var answer = res;
-                var presentation_cards = [];
-                var presentations = answer.presentations;
-                var total_presentations = presentations.length;
 
-                if(total_presentations > 1) {
-                    session.send('I found the following talk by ' + answer.speaker_name);
+                // if the server generated a message, show it, skip the cards
+                if ( answer.hasOwnProperty('message') && answer.message.length > 0 ) {
+                    session.send(answer.message);
+                    return session.replaceDialog('/presentations');
+                }
+
+                // check that some presentations were sent back
+                if ( answer.hasOwnProperty('presentations') && Array.isArray(answer.presentations) ) {
+                    var presentation_cards = [];
+                    var presentations = answer.presentations;
+                    var total_presentations = presentations.length;
+
+                    if(total_presentations > 1) {
+                        session.send('I found the following talk by ' + answer.speaker_name);
+                    } else {
+                        session.send('I found the following talks by ' + answer.speaker_name);
+                    }
+
+                    for( i = 0; i < total_presentations; i++) {
+                        var card = new builder.HeroCard(session)
+                            .title(presentations[i].presentation_name)
+                            .subtitle(presentations[i].presentation_date)
+                            .images([])
+                            .buttons([
+                                builder.CardAction.openUrl(session, presentations[i].presentation_link, 'View Details')
+                            ]);
+                            
+                        presentation_cards.push(card);
+                    }
+
+                    var response = new builder.Message(session)
+                        .textFormat(builder.TextFormat.plain)
+                        .attachmentLayout(builder.AttachmentLayout.carousel)
+                        .attachments(presentation_cards);
+                    
+                    session.send(response);
                 } else {
-                    session.send('I found the following talks by ' + answer.speaker_name);
+                    session.send("I didn't find any presentations based the search for " + results.response);
                 }
-
-                for( i = 0; i < total_presentations; i++) {
-                    var card = new builder.HeroCard(session)
-                        .title(presentations[i].presentation_name)
-                        .subtitle(presentations[i].presentation_date)
-                        .images([])
-                        .buttons([
-                            builder.CardAction.openUrl(session, presentations[i].presentation_link, 'View Details')
-                        ]);
-                        
-                    presentation_cards.push(card);
-                }
-
-                var response = new builder.Message(session)
-                    .textFormat(builder.TextFormat.plain)
-                    .attachmentLayout(builder.AttachmentLayout.carousel)
-                    .attachments(presentation_cards);
-                
-                session.send(response);
                 next();
             })
             .catch(function(err) {
@@ -241,38 +253,52 @@ bot.dialog('/currentPresentations', [
 
         rp(rp_options)
             .then(function(res) {
+                                
                 var answer = res;
-                var presentation_cards = [];
-                var presentations = answer.presentations;
-                var total_presentations = presentations.length;
-
-                if(total_presentations > 0) {
-                    var talks = total_presentations > 1 ? 'talks' : 'talk';
-                    session.send('I found ' + total_presentations + ' ' + talks + ' happening right now.');
-                } else {
-                    session.send('Sorry, I could not find any presentations on the schedule right now.');
-                    next();
-                }
-
-                for( i = 0; i < total_presentations; i++) {
-                    var presentation = presentations[i];
-                    var card = new builder.HeroCard(session)
-                        .title(presentation.presentation_name)
-                        .text(presentation.presentation_start_time + ' in ' + presentation.presentation_location)
-                        .images([])
-                        .buttons([
-                            builder.CardAction.openUrl(session, presentation.presentation_link, 'View Details')
-                        ]);
-                        
-                    presentation_cards.push(card);
-                }
-
-                var response = new builder.Message(session)
-                    .textFormat(builder.TextFormat.plain)
-                    .attachmentLayout(builder.AttachmentLayout.carousel)
-                    .attachments(presentation_cards);
                 
-                session.send(response);
+                // if the server generated a message, show it, skip the cards
+                if ( answer.hasOwnProperty('message') && answer.message.length > 0  ) {
+                    session.send(answer.message);
+                    return session.replaceDialog('/presentations');
+                }
+
+                // check that some presentations were sent back
+                if ( answer.hasOwnProperty('presentations') && Array.isArray(answer.presentations) ) {
+                    var presentation_cards = [];
+                    var presentations = answer.presentations;
+                    var total_presentations = presentations.length;
+
+                    if(total_presentations > 0) {
+                        var talks = total_presentations > 1 ? 'talks' : 'talk';
+                        session.send('I found ' + total_presentations + ' ' + talks + ' happening right now.');
+                    } else {
+                        session.send('Sorry, I could not find any presentations on the schedule right now.');
+                        next();
+                    }
+
+                    for( i = 0; i < total_presentations; i++) {
+                        var presentation = presentations[i];
+                        var card = new builder.HeroCard(session)
+                            .title(presentation.presentation_name)
+                            .text(presentation.presentation_start_time + ' in ' + presentation.presentation_location)
+                            .images([])
+                            .buttons([
+                                builder.CardAction.openUrl(session, presentation.presentation_link, 'View Details')
+                            ]);
+                            
+                        presentation_cards.push(card);
+                    }
+
+                    var response = new builder.Message(session)
+                        .textFormat(builder.TextFormat.plain)
+                        .attachmentLayout(builder.AttachmentLayout.carousel)
+                        .attachments(presentation_cards);
+                    
+                    session.send(response);
+                } else {
+                    session.send("I failed to find anything on the schedule.");
+                }
+
                 next();
             })
             .catch(function(err) {
@@ -307,41 +333,54 @@ bot.dialog('/nextPresentations', [
         rp(rp_options)
             .then(function(res) {
                 var answer = res;
-                var presentation_cards = [];
-                var presentations = answer.presentations;
-                var total_presentations = presentations.length;
 
-                if(total_presentations > 0) {
-                    var talks = total_presentations > 1 ? 'some talks' : 'one talk';
-                    session.send('I found ' + talks + ' coming up for you at ' + answer.time_slot);
-                } else {
-                    session.send('Sorry, I could not find any more presentations on the schedule right now.');
-                    next();
+                // if the server generated a message, show it, skip the cards
+                if ( answer.hasOwnProperty('message') && answer.message.length > 0 ) {
+                    session.send(answer.message);
+                    return session.replaceDialog('/presentations');
                 }
 
-                for( i = 0; i < total_presentations; i++) {
-                    var presentation = presentations[i];
-                    var card = new builder.HeroCard(session)
-                        .title(presentation.presentation_name)
-                        .text('Starts at ' + presentation.presentation_start_time + ' in ' + presentation.presentation_location)
-                        .images([])
-                        .buttons([
-                            builder.CardAction.openUrl(session, presentation.presentation_link, 'View Details')
-                        ]);
-                        
-                    presentation_cards.push(card);
-                }
+                // check that some presentations were sent back
+                if ( answer.hasOwnProperty('presentations') && Array.isArray(answer.presentations) ) {
+                    var presentation_cards = [];
+                    var presentations = answer.presentations;
+                    var total_presentations = presentations.length;
 
-                var response = new builder.Message(session)
-                    .textFormat(builder.TextFormat.plain)
-                    .attachmentLayout(builder.AttachmentLayout.carousel)
-                    .attachments(presentation_cards);
-                
-                session.send(response);
+                    if(total_presentations > 0) {
+                        var talks = total_presentations > 1 ? 'some talks' : 'one talk';
+                        session.send('I found ' + talks + ' coming up for you at ' + answer.time_slot);
+                    } else {
+                        session.send('Sorry, I could not find any more presentations on the schedule right now.');
+                        next();
+                    }
+
+                    for( i = 0; i < total_presentations; i++) {
+                        var presentation = presentations[i];
+                        var card = new builder.HeroCard(session)
+                            .title(presentation.presentation_name)
+                            .text('Starts at ' + presentation.presentation_start_time + ' in ' + presentation.presentation_location)
+                            .images([])
+                            .buttons([
+                                builder.CardAction.openUrl(session, presentation.presentation_link, 'View Details')
+                            ]);
+                            
+                        presentation_cards.push(card);
+                    }
+
+                    var response = new builder.Message(session)
+                        .textFormat(builder.TextFormat.plain)
+                        .attachmentLayout(builder.AttachmentLayout.carousel)
+                        .attachments(presentation_cards);
+                    
+                    session.send(response);
+                }  else {
+                    session.send("I failed to find anything on the schedule.");
+                }
                 next();
             })
             .catch(function(err) {
                 session.send("Something went wrong.");
+                console.log(err);
                 next();
             });
     }, 
