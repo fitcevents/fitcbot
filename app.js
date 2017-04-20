@@ -167,7 +167,7 @@ bot.dialog('/findSpeaker', [
                 // if the server generated a message, show it, skip the cards
                 if ( answer.hasOwnProperty('message') && answer.message.length > 0 ) {
                     session.send(answer.message);
-                    return session.replaceDialog('/presentations');
+                    return session.replaceDialog('/', {reprompt: true });
                 }
 
                 // check that some presentations were sent back
@@ -262,7 +262,7 @@ bot.dialog('/currentPresentations', [
                 // if the server generated a message, show it, skip the cards
                 if ( answer.hasOwnProperty('message') && answer.message.length > 0  ) {
                     session.send(answer.message);
-                    return session.replaceDialog('/presentations');
+                    return session.replaceDialog('/', {reprompt: true });
                 }
 
                 // check that some presentations were sent back
@@ -340,7 +340,7 @@ bot.dialog('/nextPresentations', [
                 // if the server generated a message, show it, skip the cards
                 if ( answer.hasOwnProperty('message') && answer.message.length > 0 ) {
                     session.send(answer.message);
-                    return session.replaceDialog('/presentations');
+                    return session.replaceDialog('/', {reprompt: true });
                 }
 
                 // check that some presentations were sent back
@@ -399,7 +399,7 @@ bot.dialog('/nextPresentations', [
 
 bot.dialog('/faq', [
     function(session){
-        builder.Prompts.text(session, "Type a question and I will phone up Shawn to get the answer.");
+        builder.Prompts.text(session, "Type a question and I'll go bug Shawn for the answer.");
     },
     function(session, results, next){
         session.sendTyping();
