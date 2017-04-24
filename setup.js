@@ -1,4 +1,4 @@
 'user strict';
-fs = require('fs');
+var fs = require('fs');
 fs.createReadStream('.bot-env')
-  .pipe(fs.createWriteStream('.env'));
+    .pipe(fs.createWriteStream('.env'));
